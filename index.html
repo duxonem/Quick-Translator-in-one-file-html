@@ -248,7 +248,7 @@
         frVP.onload = function (event) { rawVP = event.target.result.trim(); }
         frNames.onload = function (event) { rawNames = event.target.result.trim(); }
         frPhienAm.onload = function (event) { rawPhienAm = event.target.result.trim(); }
-        let highlight='';
+        let highlight = '';
 
         //tmpNames = {Han: {transText:'', action:'Update/Delete'}}
         let tmpNames = JSON.parse(localStorage.getItem('tmpNames')) || {};
@@ -997,13 +997,13 @@
         for (let i = 0; i < transArr.length; i++) {
             if (transArr[i].orgText == '\n') { result += '</p><p>'; continue; }
             if (transArr[i].orgText == transArr[i].transText)
-                result += '<span id="VP_'+(transArr[i].pos)+'" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '">' + transArr[i].transText + '</span>';
+                result += '<span id="VP_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '">' + transArr[i].transText + '</span>';
             else {
                 if (transArr[i].dict == 'VP') {
                     if (Options.oneMeaning) transArr[i].transText = transArr[i].transText.slice(Options.limiter)[0];
                     if (Options.bracket) transArr[i].transText = '[' + transArr[i].transText + ']';
                 }
-                result += '<span id="VP_'+(transArr[i].pos)+'" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '"> ' + transArr[i].transText + '</span>';
+                result += '<span id="VP_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '"> ' + transArr[i].transText + '</span>';
             }
         }
         return result;
@@ -1011,9 +1011,9 @@
 
     function getClickedText(event) {
         let t = event.target;
-        if (highlight != '') document.getElementById(highlight).style.color='';
-        highlight=t.id
-        document.getElementById(highlight).style.color='red';
+        if (highlight != '') document.getElementById(highlight).style.color = '';
+        highlight = t.id
+        document.getElementById(highlight).style.color = 'red';
         let result = '';
         const maxlength = dictVP.Han[0].length;
 
@@ -1034,9 +1034,9 @@
             }
 
         }
-        
-        txtHTML=txtHTML.replaceAll('\\n\\t','<br>');
-        txtHTML=txtHTML.replaceAll('\\n','<br>');
+
+        txtHTML = txtHTML.replaceAll('\\n\\t', '<br>');
+        txtHTML = txtHTML.replaceAll('\\n', '<br>');
         //them tra cua cac Extra dict nua la xong.
         document.getElementById('boxTuDien').innerHTML = txtHTML;
     }
