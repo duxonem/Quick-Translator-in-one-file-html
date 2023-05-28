@@ -11,11 +11,11 @@ Tuy nhiên chương trình vẫn cần các file từ điển để chạy. Các
 
 Ngoài ra có thể tải thêm các từ điển tra nghĩa để hiện khung tra nghĩa bên phải. Các từ điển được dùng trong chương trình này đều có dạng như các file Names,  Vietphrase. Cấu trúc : Tiengtrung=Tiengviet. Mỗi chữ/nhóm chữ là 1 dòng. Ví dụ:
 
-劳琳=Laurine
-劳拉=Laura
-劳伦=Lorene
-凯西=Cathy
-凯蒂=Katy
+> 劳琳=Laurine
+> 劳拉=Laura
+> 劳伦=Lorene
+> 凯西=Cathy
+> 凯蒂=Katy
 
 Để rút gọn, tối giản hóa, chương trình bỏ các nút bấm nhiều nhất có thể. Chỉ có 1 chỗ bấm ... để chọn menu Options. Khi chạy lần đầu nên vào đây để tải các từ điển cần thiết cho chương trình(PhienAm, Vietphrase, Names).
 
