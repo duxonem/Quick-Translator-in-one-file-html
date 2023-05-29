@@ -106,6 +106,10 @@
             overflow-x: hidden;
         }
 
+        #boxPhienAm {
+            font-size: 1.5em;
+        }
+
         .menu {
             display: none;
             width: fit-content;
@@ -240,15 +244,17 @@
         let dictVP = {};
         let extraDicts = [];
         let newDicts = [];
+        let learnChineseChars = localStorage.getItem('learnChineseChars') || '';
         let dictPhienAm = JSON.parse(localStorage.getItem('dictPhienAm')) || {};
         let Options = JSON.parse(localStorage.getItem('Options')) || { bracket: true, oneMeaning: false, limiter: ';', dichLieuTru: false };
         let selectedChineseText = '';
+        let VpHighlight = '', PhienAmHighlight = '';
+
         let rawVP, rawNames, rawPhienAm;
         let frVP = new FileReader(), frNames = new FileReader(), frPhienAm = new FileReader();
         frVP.onload = function (event) { rawVP = event.target.result.trim(); }
         frNames.onload = function (event) { rawNames = event.target.result.trim(); }
         frPhienAm.onload = function (event) { rawPhienAm = event.target.result.trim(); }
-        let highlight = '';
 
         //tmpNames = {Han: {transText:'', action:'Update/Delete'}}
         let tmpNames = JSON.parse(localStorage.getItem('tmpNames')) || {};
@@ -293,21 +299,22 @@
 <body>
     <fieldset id="leftSide">
         <legend>
-            <span id="lblTuDien" class="topLabel">Tu Dien</span>|
+            <span id="lblTuDien" class="topLabel">Từ điển</span>|
             <span id="lblTrung" class="topLabel">Trung</span>
         </legend>
-        <div id="boxTuDien" class="contentBox">Nghia tra tu dien</div>
+        <div id="boxTuDien" class="contentBox">Tra nghĩa từ điển từ ở khung bên phải</div>
         <textarea id="boxTrung" class="contentBox" spellcheck="false" placeholder="Nhập tiếng Trung ở đây"></textarea>
     </fieldset>
 
     <fieldset id="rightSide">
         <legend>
-            <span id="lblVp" class="topLabel">VP</span>|
-            <span id="lblPhienAm" class="topLabel">Phien Am</span>
+            <span id="lblVp" class="topLabel">Vietphrase</span>|
+            <span id="lblPhienAm" class="topLabel">Phiên Âm</span>
             <span id='lblMenu' class="topLabel">...</span>
         </legend>
-        <div id="boxVp" class="contentBox">Viet Phrase</div>
-        <div id="boxPhienAm" class="contentBox">Phien Am</div>
+        <div id="boxVp" class="contentBox">Sau khi dán text tiếng Trung vào khung bên trái, bấm qua chỗ khác để convert
+            Vietphrase ở đây</div>
+        <div id="boxPhienAm" class="contentBox">Phiên âm hiện ở đây</div>
     </fieldset>
 
     <!--  contextMenu in Vietphrase Box-->
@@ -383,7 +390,8 @@
         <fieldset>
             <legend>Các từ điển để tra nghĩa</legend>
             <div id="dictContainer">
-                <div class="tableHeader"><span class="ordCol">STT</span>
+                <div class="tableHeader"><span class="ordCol"
+                        title="Stt để xác đinh thứ tự xuất hiện của từ điển tra nghĩa">STT</span>
                     <span class="nameCol">Tên từ điển</span>
                     <span class="lastCol"><span>Action</span></span>
                 </div>
@@ -426,8 +434,8 @@
         let rowId = 'row' + id;
         let newRow = document.createElement('div');
         newRow.id = rowId;
-        newRow.innerHTML = `<span class="ordCol" id="${rowId}_ordNumber" contenteditable="true">STT</span>
-                <span class="nameCol" id="${rowId}_Name" contenteditable="true" realName="">Tên từ điển</span>
+        newRow.innerHTML = `<span class="ordCol" id="${rowId}_ordNumber" contenteditable="true" spellcheck="false">STT</span>
+                <span class="nameCol" id="${rowId}_Name" contenteditable="true" spellcheck="false" realName="">Tên từ điển</span>
                 <span id="${rowId}_upFile"><input type="file" id="${rowId}_taiFile" class="upFile"></span>
                 </span>`;
 
@@ -474,7 +482,7 @@
             let rowId = 'row' + (i + 1); //+ id;
             let newRow = document.createElement('div');
             newRow.id = rowId;
-            newRow.innerHTML = `<span class="ordCol" id="${rowId}_ordNumber" contenteditable="true">STT</span> <span class="nameCol" id="${rowId}_Name" contenteditable="true" realName="">Tên từ điển</span><span id="lastCol"><span id="${rowId}_Delete"><input type="checkbox" id="${rowId}_chkXoa">Chọn để xóa từ điển</span></span>`;
+            newRow.innerHTML = `<span class="ordCol" id="${rowId}_ordNumber" contenteditable="true" spellcheck="false">STT</span> <span class="nameCol" id="${rowId}_Name" contenteditable="true" spellcheck="false" realName="">Tên từ điển</span><span id="lastCol"><span id="${rowId}_Delete"><input type="checkbox" id="${rowId}_chkXoa">Chọn để xóa từ điển</span></span>`;
 
             document.getElementById('dictContainer').appendChild(newRow);
             document.getElementById(`${rowId}_ordNumber`).innerText = extraDicts[i].ordNumber;
@@ -593,7 +601,7 @@
 
             if (document.getElementById(`${rowId}_taiFile`) != null && document.getElementById(`${rowId}_taiFile`).files.length == 1) {
                 ordNumber = parseInt(document.getElementById(`${rowId}_ordNumber`).innerText);
-                name = document.getElementById(`${rowId}_Name`).innerText.slice(0, 20).trim();
+                name = document.getElementById(`${rowId}_Name`).innerText.slice(0, 30).trim();
 
                 for (let j = 0; j < newDicts.length; j++) {
                     if (newDicts[j].realName == realName) {
@@ -665,6 +673,8 @@
 
         document.getElementById('frmUpdate_txtChinese').innerText = selectedChineseText;
         document.getElementById('frmUpdate_txtPhienAm').innerText = translatePhienAmSimple(selectedChineseText);
+        if (dict.toLowerCase() == 'name')
+            document.getElementById('frmUpdate_txtPhienAm').innerText = toUpperCaseFirstLetterEachWord(document.getElementById('frmUpdate_txtPhienAm').innerText);
         if (txtViet == undefined) document.getElementById('frmUpdate_txtViet').innerText = document.getElementById('frmUpdate_txtPhienAm').innerText;
         else document.getElementById('frmUpdate_txtViet').innerText = txtViet;
         selectedChineseText = '';
@@ -694,6 +704,15 @@
                 tmpVP[txtChinese] = { transText: txtViet, action: 'Update' };
                 localStorage.setItem('tmpVP', JSON.stringify(tmpVP));
             }
+
+        if (tmpVP.length > 100) {
+            saveDictVP();
+            tmpVP = {};
+        }
+        if (tmpNames.length > 100) {
+            saveDictNames();
+            tmpNames = {};
+        }
         document.getElementById('frmUpdate').style.display = 'none';
         document.getElementById('frmUpdate_title').innerText = 'Update';
         selectedChineseText = '';
@@ -812,16 +831,7 @@
         return result;
     }
 
-    function translatePhienAmSimple(text) {
-        let result = '';
-        text = text.trim();
-        for (let i = 0; i < text.length; i++) {
-            PhienAm = dictPhienAm.HanViet[text.charAt(i)];
-            if (PhienAm != undefined) result += PhienAm + ' ';
-            else result += text.charAt(i);
-        }
-        return result.trim();  //remove ' ' at the end
-    }
+
 
     function rawToDict(raw) {
         let lines = String(raw).trim().split('\n'); // must have trim() to delete lines before and after data
@@ -854,6 +864,45 @@
         a.download = filename;
         a.click();
         window.URL.revokeObjectURL(a);
+    }
+
+    function translatePhienAm(text) {  //translate from left to right
+        let result = [], tmpArr = {};
+        text = text.trim();
+
+        //PhienAm
+        for (let i = 0; i < text.length; i++) {
+            char = text.charAt(i);
+            if (char == '\u0528') continue;
+            while (text.indexOf(char) >= 0) {
+                tmpArr.pos = text.indexOf(char);
+                tmpArr.orgText = char;
+                tmpArr.transText = dictPhienAm.HanViet[char];
+                tmpArr.dict = 'PhienAm';
+                if (tmpArr.transText == undefined) {
+                    tmpArr.transText = tmpArr.orgText; // truog hop cua . , ? ....
+                    tmpArr.dict = 'FA';
+                }
+
+                result.push(tmpArr);
+                text = text.replace(char, '\u0528');
+                tmpArr = {};
+            }
+        }
+
+        return result.sort((a, b) => (a.pos - b.pos));
+    }
+
+
+    function translatePhienAmSimple(text) {
+        let result = '';
+        text = text.trim();
+        for (let i = 0; i < text.length; i++) {
+            PhienAm = dictPhienAm.HanViet[text.charAt(i)];
+            if (PhienAm != undefined) result += PhienAm + ' ';
+            else result += text.charAt(i);
+        }
+        return result.trim();  //remove ' ' at the end
     }
 
     function translate1(text) {  //translate from left to right
@@ -982,7 +1031,7 @@
         return text.charAt(0).toUpperCase() + text.slice(1);
     }
 
-    function toHTML(transArr) {  //lam dep va sua theo cac Options
+    function VpToHTML(transArr) {  //lam dep va sua theo cac Options
         let result = '<p>';
         let cap = true;
         for (let i = 0; i < transArr.length; i++) {
@@ -1009,11 +1058,41 @@
         return result;
     }
 
-    function getClickedText(event) {
+    function PhienAmToHTML(transArr) {  //lam dep va sua theo cac Options
+        let result = '<p>';
+        let cap = true;
+        for (let i = 0; i < transArr.length; i++) {
+            if (transArr[i].orgText == '。' || transArr[i].orgText == '！' || transArr[i].orgText == '？' || transArr[i].orgText == '\n') cap = true;
+            if (transArr[i].orgText == transArr[i].transText) continue;
+            if (cap) {
+                transArr[i].transText = toUpperCaseFirstLetter(transArr[i].transText);
+                cap = false;
+            }
+        }
+
+        for (let i = 0; i < transArr.length; i++) {
+            if (transArr[i].orgText == '\n') { result += '</p><p>'; continue; }
+            if (transArr[i].orgText == transArr[i].transText)
+                result += '<span id="PhienAm_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '" transText="' + transArr[i].transText + '">' + transArr[i].transText + '</span>';
+            else if (learnChineseChars.indexOf(transArr[i].orgText) > -1)
+                result += '<span id="PhienAm_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '" transText="' + transArr[i].transText + '">' + transArr[i].orgText + '</span>';
+            else result += '<span id="PhienAm_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '" transText="' + transArr[i].transText + '"> ' + transArr[i].transText + '</span>';
+
+        }
+        return result;
+    }
+
+    function boxVpClick(event) {
         let t = event.target;
-        if (highlight != '') document.getElementById(highlight).style.color = '';
-        highlight = t.id
-        document.getElementById(highlight).style.color = 'red';
+        if (t.tagName != 'SPAN') {
+            document.getElementById(VpHighlight).style.color = '';
+            VpHighlight = '';
+            return;
+        }
+
+        if (VpHighlight != '') document.getElementById(VpHighlight).style.color = '';
+        VpHighlight = t.id
+        document.getElementById(VpHighlight).style.color = 'red';
         let result = '';
         const maxlength = dictVP.Han[0].length;
 
@@ -1034,11 +1113,74 @@
             }
 
         }
-
-        txtHTML = txtHTML.replaceAll('\\n\\t', '<br>');
         txtHTML = txtHTML.replaceAll('\\n', '<br>');
+        txtHTML = txtHTML.replaceAll('\\t', '&emsp;');
         //them tra cua cac Extra dict nua la xong.
         document.getElementById('boxTuDien').innerHTML = txtHTML;
+    }
+
+    function boxPhienAmClick(event) {
+        let t = event.target;
+        if (t.tagName != 'SPAN') {
+            document.getElementById(PhienAmHighlight).style.color = '';
+            PhienAmHighlight = '';
+            return;
+        }
+
+        if (PhienAmHighlight != '') document.getElementById(PhienAmHighlight).style.color = '';
+        PhienAmHighlight = t.id
+        document.getElementById(PhienAmHighlight).style.color = 'red';
+        let result = '';
+        const maxlength = dictVP.Han[0].length;
+
+        while (result.length < maxlength && t.getAttribute('orgtext') != '') {
+            result += t.getAttribute('orgtext'); //khong dung truc tiep t.orgtext duoc
+            if (t.nextElementSibling == null) break;
+            t = t.nextElementSibling;
+        }
+        //return result;
+        let txtHTML = '';
+        for (let i = result.length; i > 0; i--) {
+            if (dictVP.HanViet[result.substring(0, i)] != undefined)
+                txtHTML += '<p>' + result.substring(0, i) + ' = ' + dictVP.HanViet[result.substring(0, i)] + '</p>';
+
+            for (let j = 0; j < extraDicts.length; j++) {
+                if (extraDicts[j].data.HanViet[result.substring(0, i)] != undefined)
+                    txtHTML += '<p>' + result.substring(0, i) + ' = ' + extraDicts[j].data.HanViet[result.substring(0, i)] + '</p>';
+            }
+
+        }
+        txtHTML = txtHTML.replaceAll('\\n', '<br>');
+        txtHTML = txtHTML.replaceAll('\\t', '&emsp;');
+        //them tra cua cac Extra dict nua la xong.
+        document.getElementById('boxTuDien').innerHTML = txtHTML;
+    }
+
+    function boxPhienAmDblClick(event) {
+        let t = event.target;
+        if (t.tagName != 'SPAN') return;
+        let char = t.innerText.trim()
+        let orgText = t.getAttribute('orgtext');
+        let transText = t.getAttribute('transtext');
+        let tArr = [];
+        if (orgText == transText) return;
+
+        if (transText == char) {
+            learnChineseChars += orgText;
+            tArr = document.getElementById('boxPhienAm').querySelectorAll('span');
+            for (let i = 0; i < tArr.length; i++) {
+                if (tArr[i].getAttribute('transtext') == char) tArr[i].innerText = orgText;
+            }
+        }
+
+        if (orgText == char) {
+            learnChineseChars = learnChineseChars.replace(orgText, ''); //xoa
+            tArr = document.getElementById('boxPhienAm').querySelectorAll('span');
+            for (let i = 0; i < tArr.length; i++) {
+                if (tArr[i].getAttribute('orgtext') == char) tArr[i].innerText = ' ' + transText;
+            }
+        }
+        localStorage.setItem('learnChineseChars', learnChineseChars);
     }
 
     /*     IndexedDb sextion     */
@@ -1126,7 +1268,7 @@
         const request = indexedDB.open("QTlikedWeb", 1);
         request.onsuccess = () => {
             dbase = request.result;
-            dbase.transaction(['essentialDicts'], 'readwrite').objectStore('essentialDicts').put({ name: 'Names', data: JSON.stringify(dictNames) }).onsuccess = function (e) {
+            dbase.transaction(['essentialDicts'], 'readwrite').objectStore('essentialDicts').put({ name: 'Vietphrase', data: JSON.stringify(dictVP) }).onsuccess = function (e) {
                 console.log(e.target.result);
             }
             dbase.transaction(['essentialDicts']).oncomplete = () => { dbase.close(); }
@@ -1192,8 +1334,10 @@
 
     /* -------------------------------------------- */
 
-    document.getElementById('boxVp').onclick = getClickedText;
+    document.getElementById('boxVp').onclick = boxVpClick;
     document.getElementById('boxVp').oncontextmenu = loadBoxVp_contextMenu;
+    document.getElementById('boxPhienAm').onclick = boxPhienAmClick;
+    document.getElementById('boxPhienAm').ondblclick = boxPhienAmDblClick;
     document.getElementById('lblMenu').onclick = loadMainMenu;
     document.getElementById('ctxtMenu_editName').onclick = () => loadFrmUpdateDict('Name');
     document.getElementById('ctxtMenu_editVp').onclick = () => loadFrmUpdateDict('Vietphrase');
@@ -1202,7 +1346,9 @@
     document.getElementById('boxTrung').onchange = () => {
         let text1 = translate1(document.getElementById('boxTrung').value);
         let text2 = translate2(document.getElementById('boxTrung').value);
-        document.getElementById('boxVp').innerHTML = toHTML(text2);
+        let textPhienAm = translatePhienAm(document.getElementById('boxTrung').value);
+        document.getElementById('boxVp').innerHTML = VpToHTML(text2);
+        document.getElementById('boxPhienAm').innerHTML = PhienAmToHTML(textPhienAm);
         document.getElementById('lblVp').click();
         document.getElementById('lblTuDien').click();
     }
@@ -1255,7 +1401,17 @@
     document.getElementById('frmOptions_btnCancel').onclick = frmOptions_btnCancelClick;
     document.getElementById('frmOptions_btnSave').onclick = frmOptions_btnSaveClick;
     //txtTrung onchange
-    document.getElementById('frmUpdate_txtChinese').onchange = () => { document.getElementById('frmUpdate_txtPhienAm').innerText = translatePhienAmSimple(document.getElementById('frmUpdate_txtChinese').innerText); }
+    document.getElementById('frmUpdate_txtChinese').onchange = function () {  //this wont fire ifs from tablle cell
+        let text = document.getElementById('frmUpdate_txtChinese').innerText;
+        console.log(text);
+        text = translatePhienAmSimple(text);
+        console.log(text);
+
+        if (document.getElementById('frmUpdate_lblNameVP').innerText == 'Name')
+            document.getElementById('frmUpdate_txtPhienAm').innerText = toUpperCaseFirstLetterEachWord(text);
+        else document.getElementById('frmUpdate_txtPhienAm').innerText = text;
+        console.log(document.getElementById('frmUpdate_txtPhienAm').innerText)
+    }
     document.getElementById('frmUpdate_btnSave').onclick = frmUpdate_btnSaveClick;
     document.getElementById('frmUpdate_btnDelete').onclick = frmUpdate_btnDeleteClick;
     document.getElementById('frmUpdate_btnCancel').onclick = frmUpdate_btnCancelClick;
@@ -1266,10 +1422,8 @@
     loadExtraDicts();
     document.getElementById('frmOptions').style.display = 'none';
     document.getElementById('frmUpdate').style.display = 'none';
-   // if (JSON.stringify(dictPhienAm) == '{}' || JSON.stringify(dictNames) == '{}' || JSON.stringify(dictVP) == '{}')
-   //     loadFrmOptions(); //tai Form Option neu chua co du tu dien Names, Vietphrase hoac PhienAm
-
+    //if (JSON.stringify(dictPhienAm) == '{}' || JSON.stringify(dictNames) == '{}' || JSON.stringify(dictVP) == '{}')
+    //    loadFrmOptions(); //tai Form Option neu chua co du tu dien Names, Vietphrase hoac PhienAm
 
 </script>
-
 </html>
