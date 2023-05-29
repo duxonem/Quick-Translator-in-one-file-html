@@ -1,7 +1,7 @@
 # Quick-Translator-in-one-file-html
 ### Giới thiệu
 
-Chương trình này hoạt động giống Quick Translator nhưng chỉ có 1 file index.html chạy duy nhất và chạy trên trình duyệt web như Firefox, Chrome...
+Chương trình này hoạt động giống Quick Translator nhưng chỉ có 1 file index.html chạy duy nhất và chạy trên trình duyệt web như Firefox, Chrome... Vì chạy trên trình duyệt nên nó độc lập với hệ điều hành, có thể chạy trên Mac, linux. Ngoài ra, trên Quick Translator khung Phiên Âm khá vô dụng nên được chuyển qua dùng giống CxDict là đọc và đánh dấu những chữ đã biết hiện thẳng chữ Trung.
 
 ### Cài đặt và cách dùng
 
@@ -24,6 +24,8 @@ Sau khi đã tải đủ các từ điển cần thiết, dán văn bản tiến
 Để tra nghĩa từ nào thì bạn bấm vào, từ đó sẽ hiện đỏ và nghĩa sẽ hiện ở khu bên khung "Từ Điển" bên trái. Để hiện nghĩa thì bạn phải vào menu Options tải thêm các từ điển tra nghĩa. Bạn có thể đặt tên, sắp xếp thứ tự hiện trên khung tra từ điển ở đây.
 
 Để thêm, sửa nghĩa Vietphrase, Names thao tác như trên Quick Translator.
+
+Khung Phiên Âm sẽ chỉ hiện Hán Việt, chữ nào không biết có thể click vào để hiện nghĩa trên khung bên trái. Nếu từ nào đã đọc quen, muốn hiện thẳng chữ Trung thì double click vào chữ đó, để trở lại bấm dblClick lần  nữa
 
 Để lưu/backup các file Names, Vietphrase chương trình có các menu export các file trên để lưu lại nơi khác
 
