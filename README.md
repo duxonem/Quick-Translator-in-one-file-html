@@ -32,3 +32,4 @@ Khung Phiên Âm sẽ chỉ hiện Hán Việt, chữ nào không biết có th�
 ### Lưu ý
 
 Do các file từ điển lưu ở localStorage và indexedDB, nếu mở file trên nội bộ máy tính, khi chuyển qua nơi khác sẽ dẫn đến đổi đường dẫn. Điều này khiến trình duyệt hiểu giống như đổi tên miền khác dẫn đến các từ điển đã tải lên sẽ không có cho cho chương trình ở  đường dẫn mới. Vì vậy không nên chuyển vị trí nếu đã dùng quen.
+Video hướng dẫn: https://streamable.com/2u86rh
