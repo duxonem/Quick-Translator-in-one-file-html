@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="QT liked on web">
+    <meta name="description" content="Convert truyện tiếng trung kiểu Vietphrase từ trình duyệt web">
     <meta name="keywords" content="convert, vietphrase">
-    <meta name="author" content="duxonem">
+    <meta name="author" content="Me, Moi, Tôi">
+    <meta name="title" content="Vietphrase Translator">
     <style>
         html {
             color-scheme: light dark;
@@ -234,7 +235,9 @@
     <script type="text/javascript">
         "use strict";
         let dictNames = {};
+        let tmpNames = JSON.parse(localStorage.getItem('tmpNames')) || {};
         let dictVP = {};
+        let tmpVP = JSON.parse(localStorage.getItem('tmpVP')) || {};
         let extraDicts = [];
         let newDicts = [];
         let learnChineseChars = localStorage.getItem('learnChineseChars') || '';
@@ -243,47 +246,13 @@
         let selectedChineseText = '';
         let VpHighlight = '', PhienAmHighlight = '';
 
+        let firstClick = true; //De danh choi
+
         let rawVP, rawNames, rawPhienAm;
         let frVP = new FileReader(), frNames = new FileReader(), frPhienAm = new FileReader();
         frVP.onload = function (event) { rawVP = event.target.result.trim(); }
         frNames.onload = function (event) { rawNames = event.target.result.trim(); }
         frPhienAm.onload = function (event) { rawPhienAm = event.target.result.trim(); }
-
-        let tmpNames = JSON.parse(localStorage.getItem('tmpNames')) || {};
-        if (JSON.stringify(tmpNames) != '{}') { 
-            if (JSON.stringify(dictNames) == '{}') dictNames = { Han: [], HanViet: {} };
-            let orgText = Object.keys(tmpNames)
-            for (let i = 0; i < orgText.length; i++)
-                if (tmpNames[orgText[i]].action == 'Update') {
-                    if (dictNames.Han.indexOf(orgText[i]) > -1) dictNames.HanViet[orgText[i]] = tmpNames[orgText[i]].transText; //da co, chi thay the
-                    else {
-                        dictNames.Han.push(orgText[i]);
-                        dictNames.HanViet[orgText[i]] = tmpNames[orgText[i]].transText;
-                    }
-                }
-                else if (dictNames.HanViet[orgText[i]] != undefined) {
-                    delete dictNames.HanViet[orgText[i]];
-                    dictNames.Han.splice(dictNames.Han.indexOf(orgText[i]), 1);
-                }
-        }
-
-        let tmpVP = JSON.parse(localStorage.getItem('tmpVP')) || {};
-        if (JSON.stringify(tmpVP) != '{}') {
-            if (JSON.stringify(dictVP) == '{}') dictVP = { Han: [], HanViet: {} };
-            let orgText = Object.keys(tmpVP)
-            for (let i = 0; i < orgText.length; i++)
-                if (tmpVP[orgText[i]].action == 'Update')
-                    if (dictVP.Han.indexOf(orgText[i]) > -1) dictVP.HanViet[orgText[i]] = tmpVP[orgText[i]].transText; //da co, chi thay the
-                    else {
-                        dictVP.Han.push(orgText[i]);
-                        dictVP.HanViet[orgText[i]] = tmpVP[orgText[i]].transText;
-                    }
-                else if (dictNames.HanViet[orgText[i]] != undefined) {
-                    delete dictVP.HanViet[orgText[i]];
-                    dictVP.Han.splice(dictVP.Han.indexOf(orgText[i]), 1);
-                }
-        }
-
 
     </script>
 </head>
@@ -614,7 +583,7 @@
         document.getElementById('inFilePhienAm').value = '';
         document.getElementById('inFileNames').value = '';
         document.getElementById('inFileVP').value = '';
-      
+
         for (let i = 1; i < document.getElementById('dictContainer').childElementCount;) {
             rowId = document.getElementById('dictContainer').children[i].id;
             if (document.getElementById(`${rowId}_taiFile`) != undefined)
@@ -657,7 +626,7 @@
         if (txtViet == undefined) document.getElementById('frmUpdate_txtViet').innerText = document.getElementById('frmUpdate_txtPhienAm').innerText;
         else document.getElementById('frmUpdate_txtViet').innerText = txtViet;
         selectedChineseText = '';
-    } 
+    }
 
     function frmUpdate_btnSaveClick() {
         let txtChinese = document.getElementById('frmUpdate_txtChinese').innerText.trim();
@@ -673,6 +642,7 @@
                 dictNames.HanViet[txtChinese] = txtViet;
                 tmpNames[txtChinese] = { transText: txtViet, action: 'Update' };
                 localStorage.setItem('tmpNames', JSON.stringify(tmpNames));
+                dictNames.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
             }
 
         else  //dictName== VP
@@ -682,6 +652,7 @@
                 dictVP.HanViet[txtChinese] = txtViet;
                 tmpVP[txtChinese] = { transText: txtViet, action: 'Update' };
                 localStorage.setItem('tmpVP', JSON.stringify(tmpVP));
+                dictVP.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
             }
 
         if (tmpVP.length > 100) {
@@ -708,13 +679,13 @@
 
         if (dictName == 'Name') {
             delete dictNames.HanViet[txtChinese];
-            dictNames.Han.splice(dictNames.Han.indexOf(txtChinese),1);
+            dictNames.Han.splice(dictNames.Han.indexOf(txtChinese), 1);
             tmpNames[txtChinese] = { transText: '', action: 'Delete' };
             localStorage.setItem('tmpNames', JSON.stringify(tmpNames));
         }
         if (dictName == 'Vietphrase') {
             delete dictVP.HanViet[txtChinese];  //??? khong chay
-            dictVP.Han.splice(dictVP.Han.indexOf(txtChinese),1);
+            dictVP.Han.splice(dictVP.Han.indexOf(txtChinese), 1);
             tmpVP[txtChinese] = { transText: '', action: 'Delete' };
             localStorage.setItem('tmpVP', JSON.stringify(tmpVP));
         }
@@ -994,7 +965,7 @@
         return tmpArr.join(' ');
     }
 
-    function toUpperCaseFirstLetter(text) { return text.charAt(0).toUpperCase() + text.slice(1);}
+    function toUpperCaseFirstLetter(text) { return text.charAt(0).toUpperCase() + text.slice(1); }
 
     function VpToHTML(transArr) {  //lam dep va sua theo cac Options
         let result = '<p>';
@@ -1049,7 +1020,7 @@
 
     function boxVpClick(event) {
         let t = event.target;
-        if (t.tagName != 'SPAN') {
+        if (t.tagName != 'SPAN' && VpHighlight != '') {
             document.getElementById(VpHighlight).style.color = '';
             VpHighlight = '';
             return;
@@ -1066,7 +1037,7 @@
             if (t.nextElementSibling == null) break;
             t = t.nextElementSibling;
         }
-        
+
         let txtHTML = '';
         for (let i = result.length; i > 0; i--) {
             if (dictVP.HanViet[result.substring(0, i)] != undefined)
@@ -1195,6 +1166,20 @@
             dbase = request.result;
             if (dbase.objectStoreNames.contains("essentialDicts")) dbase.transaction('essentialDicts').objectStore('essentialDicts').get('Vietphrase').onsuccess = function (e) {
                 dictVP = JSON.parse(e.target.result.data);
+                if (JSON.stringify(tmpVP) != '{}') {
+                    if (JSON.stringify(dictVP) == '{}') dictVP = { Han: [], HanViet: {} };
+                    let orgText = Object.keys(tmpVP);
+                    for (let i = 0; i < orgText.length; i++)
+                        if (tmpVP[orgText[i]].action == 'Update') {
+                            if (dictVP.Han.indexOf(orgText[i]) < 0) dictVP.Han.push(orgText[i]);
+                            dictVP.HanViet[orgText[i]] = tmpVP[orgText[i]].transText;
+                        }
+                        else if (dictVP.HanViet[orgText[i]] != undefined) {
+                            delete dictVP.HanViet[orgText[i]];
+                            dictVP.Han.splice(dictVP.Han.indexOf(orgText[i]), 1);
+                        }
+                    dictVP.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
+                }
                 dbase.transaction('essentialDicts').oncomplete = () => { dbase.close(); }
             }
         }
@@ -1206,6 +1191,21 @@
             dbase = request.result;
             if (dbase.objectStoreNames.contains("essentialDicts")) dbase.transaction('essentialDicts').objectStore('essentialDicts').get('Names').onsuccess = function (e) {
                 dictNames = JSON.parse(e.target.result.data);
+                if (JSON.stringify(tmpNames) != '{}') {
+                    if (JSON.stringify(dictNames) == '{}') dictNames = { Han: [], HanViet: {} };
+                    let orgText = Object.keys(tmpNames);
+                    for (let i = 0; i < orgText.length; i++)
+                        if (tmpNames[orgText[i]].action == 'Update') {
+                            if (dictNames.Han.indexOf(orgText[i]) < 0) dictNames.Han.push(orgText[i]);
+                            dictNames.HanViet[orgText[i]] = tmpNames[orgText[i]].transText;
+                        }
+                        else if (dictNames.HanViet[orgText[i]] != undefined) {
+                            delete dictNames.HanViet[orgText[i]];
+                            dictNames.Han.splice(dictNames.Han.indexOf(orgText[i]), 1);
+                        }
+                    dictNames.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
+                }
+
                 dbase.transaction('essentialDicts').oncomplete = () => { dbase.close(); }
             }
         }
@@ -1292,7 +1292,6 @@
     }
 
     /* -------------------------------------------- */
-
     document.getElementById('boxVp').onclick = boxVpClick;
     document.getElementById('boxVp').oncontextmenu = loadBoxVp_contextMenu;
     document.getElementById('boxPhienAm').onclick = boxPhienAmClick;
@@ -1341,6 +1340,7 @@
     }
 
     document.body.onclick = (event) => {
+        //console.log(event.target);
         if (event.target.classList[0] != 'menuItem' && event.target.id != 'lblMenu') {
             document.getElementById(`mainMenu`).style.display = `none`;
             document.getElementById(`boxVp_contextMenu`).style.display = `none`;
@@ -1357,7 +1357,7 @@
 
     document.getElementById('frmOptions_btnCancel').onclick = frmOptions_btnCancelClick;
     document.getElementById('frmOptions_btnSave').onclick = frmOptions_btnSaveClick;
-    
+
     document.getElementById('frmUpdate_txtChinese').onblur = function () {  //this wont fire ifs from tablle cell
         let text = document.getElementById('frmUpdate_txtChinese').innerText;
         text = translatePhienAmSimple(text);
@@ -1377,6 +1377,6 @@
     loadExtraDicts();
     document.getElementById('frmOptions').style.display = 'none';
     document.getElementById('frmUpdate').style.display = 'none';
-
 </script>
+
 </html>
