@@ -35,3 +35,5 @@ Với riêng Firefox, do các file từ điển lưu ở localStorage và indexe
 Các trình duyệt với nhân Chromium không bị tình trạng như trên.
 
 Video hướng dẫn: https://streamable.com/2u86rh
+
+Link thử https://qtwtest.000webhostapp.com/  
