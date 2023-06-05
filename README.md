@@ -5,7 +5,7 @@ Chương trình này hoạt động giống Quick Translator nhưng chỉ có 1 
 
 ### Cài đặt và cách dùng
 
-Bạn có thể bỏ file index.html này lên 1 webserver để chạy trên mạng hoặc để trên máy tính dùng File explorer để mở trong trình duyệt. File rất nhỏ khoảng 55KB không cần cài thêm gì khác như .Net Framework đối với Quick Translator.
+Bạn có thể bỏ file index.html này lên 1 webserver để chạy trên mạng hoặc để trên máy tính dùng File explorer để mở trong trình duyệt. File rất nhỏ khoảng 65KB không cần cài thêm gì khác như .Net Framework đối với Quick Translator.
 
 Tuy nhiên chương trình vẫn cần các file từ điển để chạy. Các file từ điển cần thiết là Names.txt dùng cho tên nhân vật, Vietphrase.txt để convert các từ Trung sang Việt, PhienAm.txt để chuyển về âm Hán Việt.
 
@@ -25,7 +25,9 @@ Sau khi đã tải đủ các từ điển cần thiết, dán văn bản tiến
 
 Để thêm, sửa nghĩa Vietphrase, Names thao tác như trên Quick Translator.
 
-Khung Phiên Âm sẽ chỉ hiện Hán Việt, chữ nào không biết có thể click vào để hiện nghĩa trên khung bên trái. Nếu từ nào đã đọc quen, muốn hiện thẳng chữ Trung thì double click vào chữ đó, để trở lại bấm dblClick lần  nữa
+Khung Phiên Âm sẽ chỉ hiện Hán Việt, chữ nào không biết có thể click vào để hiện nghĩa trên khung bên trái. Nếu từ nào đã đọc quen, muốn hiện thẳng chữ Trung thì double click vào chữ đó, để trở lại bấm dblClick lần nữa. 
+
+Khung "Từ lặp" sẽ hiện những cụm từ lặp lại nhiều lần. Nó có khả năng cao là Name, Vietphrase. Bạn dễ dàng kiểm tra trong từ điển mình có chưa để thêm vào.
 
 Để lưu/backup các file Names, Vietphrase chương trình có các menu export các file trên để lưu lại nơi khác
 
