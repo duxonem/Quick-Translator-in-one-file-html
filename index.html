@@ -241,8 +241,10 @@
         let tmpVP = JSON.parse(localStorage.getItem('tmpVP')) || {};
         let extraDicts = [];
         let newDicts = [];
+        let dictReady = { PhienAm: false, Vietphrase: false, Names: false };
         let learnChineseChars = localStorage.getItem('learnChineseChars') || '';
         let dictPhienAm = JSON.parse(localStorage.getItem('dictPhienAm')) || {};
+        if (JSON.stringify(dictPhienAm) != '{}') dictReady.PhienAm = true;
         let Options = JSON.parse(localStorage.getItem('Options')) || { bracket: true, oneMeaning: false, limiter: ';', dichLieuTru: false };
         let selectedChineseText = '';
         let VpHighlight = '', PhienAmHighlight = '';
@@ -271,12 +273,25 @@
     <fieldset id="rightSide">
         <legend>
             <span id="lblVp" class="topLabel">Vietphrase</span>|
-            <span id="lblPhienAm" class="topLabel">Phiên Âm</span>
+            <span id="lblPhienAm" class="topLabel">Phiên Âm</span>|
+            <span id="lblTuLap" class="topLabel"  style='display:none;'>Từ lặp</span>
             <span id='lblMenu' class="topLabel">...</span>
         </legend>
-        <div id="boxVp" class="contentBox">Sau khi dán text tiếng Trung vào khung bên trái, bấm qua chỗ khác để convert
-            Vietphrase ở đây</div>
+        <div id="boxVp" class="contentBox">Sau khi dán text Trung vào khung bên trái, bấm qua chỗ khác để hiện Vietphrase ở đây</div>
         <div id="boxPhienAm" class="contentBox">Phiên âm hiện ở đây</div>
+        <div id="boxTuLap" class="contentBox" style="display:block;">
+            <br>Nếu đây là lần đầu tiên chạy chương trình, bạn bấm vào nút ... ở trên, chọn Options để tải các từ điển cần thiết cho chương trình.
+
+Các từ điển cần thiết là Phiên Âm, Names, Vietphrase. Các từ điển giải nghĩa để hiện ở khung bên trái khi bạn click 1 chữ ở khung Vietphrase hoặc Phiên Âm.
+
+Ở khung Phiên Âm,có thể Double-Click 1 chữ nào đó để chuyển nó qua chữ Trung, double-click lần nữa để trở về Hán Việt.
+
+Nếu thích bạn có thể Save (Ctrl+S) file này về máy để sử dụng trên máy của bạn mà không cần nối mạng. File này đang host trên hosting miễn phí nên nếu Save lại có thể dính các đoạn mã quảng cáo được chèn vào.
+
+Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem/Quick-Translator-in-one-file-html'>https://github.com/duxonem/Quick-Translator-in-one-file-html</a>
+
+<a href="?cosan">Dùng thử với từ điển tạm</a>  
+        </div>
     </fieldset>
 
     <!--  contextMenu in Vietphrase Box-->
@@ -369,7 +384,8 @@
             <table>
                 <tr>
                     <td>Trung</td>
-                    <td id="frmUpdate_txtChinese" contenteditable="true" size="40">Tinh lai di em</td>
+                    <td id="frmUpdate_txtChinese" contenteditable="true" size="40" spellcheck="false">Tinh lai di em
+                    </td>
                 </tr>
                 <tr>
                     <td style="width: 35%;">Phien Am</td>
@@ -377,7 +393,7 @@
                 </tr>
                 <tr>
                     <td id="frmUpdate_lblNameVP">Name/Vietphrase</td>
-                    <td id="frmUpdate_txtViet" contenteditable="true">Tifnh laf </td>
+                    <td id="frmUpdate_txtViet" contenteditable="true" spellcheck="false">Tifnh laf </td>
                 </tr>
             </table>
             <div id="frmUpdate_NameExtent"></div>
@@ -412,7 +428,7 @@
     function onFileChange(event) {
         let rowId = event.target.id.split('_')[0];
         let ordNumber = parseInt(document.getElementById(`${rowId}_ordNumber`).innerText);
-        let name = document.getElementById(`${rowId}_Name`).innerText.slice(0, 20).trim();
+        let name = document.getElementById(`${rowId}_Name`).innerText.trim();
         let realName = document.getElementById(`${rowId}_Name`).getAttribute('realName');
         let FR = new FileReader;
         FR.onload = loadReadFile;
@@ -557,7 +573,7 @@
 
             if (document.getElementById(`${rowId}_taiFile`) != null && document.getElementById(`${rowId}_taiFile`).files.length == 1) {
                 ordNumber = parseInt(document.getElementById(`${rowId}_ordNumber`).innerText);
-                name = document.getElementById(`${rowId}_Name`).innerText.slice(0, 30).trim();
+                name = document.getElementById(`${rowId}_Name`).innerText.trim();
 
                 for (let j = 0; j < newDicts.length; j++) {
                     if (newDicts[j].realName == realName) {
@@ -624,6 +640,8 @@
         document.getElementById('frmUpdate_txtPhienAm').innerText = translatePhienAmSimple(selectedChineseText);
         if (dict.toLowerCase() == 'name')
             document.getElementById('frmUpdate_txtPhienAm').innerText = toUpperCaseFirstLetterEachWord(document.getElementById('frmUpdate_txtPhienAm').innerText);
+
+        document.getElementById('frmUpdate_txtViet').focus();
         if (txtViet == undefined) document.getElementById('frmUpdate_txtViet').innerText = document.getElementById('frmUpdate_txtPhienAm').innerText;
         else document.getElementById('frmUpdate_txtViet').innerText = txtViet;
         selectedChineseText = '';
@@ -730,8 +748,11 @@
         document.getElementById('mainMenu').style.display = 'none';
 
         selectedChineseText = getSelectedText().trim();
-        if (selectedChineseText == '' || selectedChineseText == document.getSelection().toString().trim()) return;
-
+        //if (selectedChineseText == '' || selectedChineseText == document.getSelection().toString().trim()) return;
+        if (selectedChineseText == '' && !isChineseText(document.getSelection().toString().trim())) return;
+        console.log(selectedChineseText);
+        console.log(document.getSelection().toString().trim());
+        if (selectedChineseText == '') selectedChineseText =document.getSelection().toString().trim();
         document.getElementById('boxVp_contextMenu').style = 'display: inline-flex';
         const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
         const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
@@ -832,6 +853,27 @@
         return result.sort((a, b) => (a.pos - b.pos));
     }
 
+    function translateSimple(text) {
+        text=text.trim();
+        let result='';
+        maxlength=dictVP.Han[0].length<text.length? dictVP.Han[0].length:text.length;
+        for (let i=0; i<text.length; i++)
+            for(let j=maxlength; j>0; j--) {
+                if (i+j >text.length) continue;
+                sub=text.slice(i,i+j);
+                if (dictNames.HanViet[sub]!=undefined) {
+                    result+=dictNames.HanViet[sub]+' ';
+                    i=i+j;
+                    break; }
+                if (dictVP.HanViet[sub]!=undefined) {
+                    result+=dictVP.HanViet[sub]+' ';
+                    i=i+j;
+                    break; }
+                if (j==1) result+=dictPhienAm.HanViet[sub]+' ';
+                console.log(sub);
+            }
+        return result;    
+    }
 
     function translatePhienAmSimple(text) {
         let result = '';
@@ -844,7 +886,7 @@
         return result.trim();  //remove ' ' at the end
     }
 
-    function translate1(text) {  //translate from left to right
+    function translate1(text) {  //1 va 2 nhu nhau, length first. Can lam 2 cai tu trai quap phai
         let result = [], tmpArr = {};
         text = text.trim();
         for (let i = 0; i < dictNames.Han.length; i++) {
@@ -898,7 +940,7 @@
         return result.sort((a, b) => (a.pos - b.pos));
     }
 
-    function translate2(txtChinese) {
+    function translate2(txtChinese) { //length first
         result = [];
         tmpArr = {};
         for (let i = 0; i < dictNames.Han.length; i++) {
@@ -911,7 +953,7 @@
                 result.push(tmpArr);
                 tmpArr = {};
                 txtChinese = txtChinese.replace(dictNames.Han[i], '\u0528'.repeat(dictNames.Han[i].length));
-                pos = txtChinese.indexOf(dictNames.Han[i], pos);
+                pos = txtChinese.indexOf(dictNames.Han[i], pos+1);
             }
         }
 
@@ -926,7 +968,7 @@
                 result.push(tmpArr);
                 tmpArr = {};
                 txtChinese = txtChinese.replace(dictVP.Han[i], '\u0528'.repeat(dictVP.Han[i].length));
-                pos = txtChinese.indexOf(dictVP.Han[i], pos);
+                pos = txtChinese.indexOf(dictVP.Han[i], pos+1);
             }
         }
 
@@ -1021,7 +1063,7 @@
 
     function boxVpClick(event) {
         let t = event.target;
-        if (t.tagName != 'SPAN' && VpHighlight != '') {
+        if (t.tagName != 'SPAN') {
             document.getElementById(VpHighlight).style.color = '';
             VpHighlight = '';
             return;
@@ -1166,6 +1208,7 @@
         request.onsuccess = () => {
             dbase = request.result;
             if (dbase.objectStoreNames.contains("essentialDicts")) dbase.transaction('essentialDicts').objectStore('essentialDicts').get('Vietphrase').onsuccess = function (e) {
+                if (e.target.result == undefined) return;  //them de khong loi duoi
                 dictVP = JSON.parse(e.target.result.data);
                 if (JSON.stringify(tmpVP) != '{}') {
                     if (JSON.stringify(dictVP) == '{}') dictVP = { Han: [], HanViet: {} };
@@ -1181,6 +1224,7 @@
                         }
                     dictVP.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
                 }
+                dictReady.Vietphrase = true;
                 dbase.transaction('essentialDicts').oncomplete = () => { dbase.close(); }
             }
         }
@@ -1191,6 +1235,7 @@
         request.onsuccess = () => {
             dbase = request.result;
             if (dbase.objectStoreNames.contains("essentialDicts")) dbase.transaction('essentialDicts').objectStore('essentialDicts').get('Names').onsuccess = function (e) {
+                if (e.target.result == undefined) return; //them de khong loi duoi
                 dictNames = JSON.parse(e.target.result.data);
                 if (JSON.stringify(tmpNames) != '{}') {
                     if (JSON.stringify(dictNames) == '{}') dictNames = { Han: [], HanViet: {} };
@@ -1206,7 +1251,7 @@
                         }
                     dictNames.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
                 }
-
+                dictReady.Names = true;
                 dbase.transaction('essentialDicts').oncomplete = () => { dbase.close(); }
             }
         }
@@ -1292,17 +1337,83 @@
         request.oncomplete = () => { dbase.close(); }
     }
 
+    ///////////////////////////////////////////////////////
+    function loadOnSitePhienAm(dict = 'ChinesePhienAmWords.txt') {
+        fetch(dict)
+            .then((res) => res.text())
+            .then((data) => {
+                dictPhienAm = rawToDict(data.trim());
+                dictReady.PhienAm = true;
+            });
+    }
+
+    function loadOnSiteVietphrase(dict = 'VietPhrase.txt') {
+        fetch(dict)
+            .then((res) => res.text())
+            .then((data) => {
+                dictVP = rawToDict(data.trim());
+                dictReady.Vietphrase = true;
+            });
+    }
+    function loadOnSiteNames(dict = 'Names.txt') {
+        fetch(dict)
+            .then((res) => res.text())
+            .then((data) => {
+                dictNames = rawToDict(data.trim());
+                dictReady.Names = true;
+            });
+    }
+
+    /////////////////////////////////////////////////////
+    function countRepeatWords(myString = 'hello', from = 2, upto = 10, frequence = 3) {
+        
+        myString=myString.trim();
+        let tmpString = myString;
+        const marks = ['。', '，', '“', '”', '！', '？', '\n', '：', '.', ',', '!', '?'];
+        for (let i = 0; i < marks.length; i++)
+            tmpString = tmpString.replaceAll(marks[i], '\u0528');
+
+        let searchString = '';
+        let mySet = new Set();
+        let tmpArr = tmpString.split('\u0528');
+        for (let i = 0; i < tmpArr.length; i++)
+            for (let j = 0; j < tmpArr[i].length; j++)
+                for (let k = from; k <= upto; k++) {
+                    if (j + k > tmpArr[i].length) continue;
+                    searchString = tmpArr[i].slice(j, j + k).trim();
+                    if (searchString.length >= from) mySet.add(searchString);
+                }
+
+        let result = [{ 'word': 'word', 'freq': 0 }];
+        result.pop();  //Xoa cai dinh nghia o tren di
+        let searchArr = Array.from(mySet);
+
+        let freq = 0;
+        for (let i = 0; i < searchArr.length; i++) {
+            freq = myString.split(searchArr[i]).length - 1;
+            if (freq > frequence) result.push({ 'word': searchArr[i], 'freq': freq });
+        }
+
+        result.sort((a, b) => { return b.freq - a.freq || b.length-a.length}); //b.word.localeCompare(a.word)
+        return result;
+    }
+
+    function isChineseText(text) {
+            regex=/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/
+            return (text.match(regex) != null);
+        }
     /* -------------------------------------------- */
     document.getElementById('boxVp').onclick = boxVpClick;
     document.getElementById('boxVp').oncontextmenu = loadBoxVp_contextMenu;
     document.getElementById('boxPhienAm').onclick = boxPhienAmClick;
     document.getElementById('boxPhienAm').ondblclick = boxPhienAmDblClick;
+    document.getElementById('boxTuLap').oncontextmenu = loadBoxVp_contextMenu;
     document.getElementById('lblMenu').onclick = loadMainMenu;
     document.getElementById('ctxtMenu_editName').onclick = () => loadFrmUpdateDict('Name');
     document.getElementById('ctxtMenu_editVp').onclick = () => loadFrmUpdateDict('Vietphrase');
     document.getElementById('menuOptions').onclick = loadFrmOptions;
 
-    document.getElementById('boxTrung').onblur = () => {
+    document.getElementById('boxTrung').onchange = () => {
         let text1 = translate1(document.getElementById('boxTrung').value);
         let text2 = translate2(document.getElementById('boxTrung').value);
         let textPhienAm = translatePhienAm(document.getElementById('boxTrung').value);
@@ -1310,6 +1421,7 @@
         document.getElementById('boxPhienAm').innerHTML = PhienAmToHTML(textPhienAm);
         document.getElementById('lblVp').click();
         document.getElementById('lblTuDien').click();
+        document.getElementById('lblTuLap').style.display='revert';
     }
 
     document.getElementById('lblTuDien').onclick = () => {
@@ -1329,19 +1441,38 @@
     document.getElementById('lblVp').onclick = () => {
         document.getElementById('lblVp').style.fontWeight = '800';
         document.getElementById('lblPhienAm').style.fontWeight = '100';
+        document.getElementById('lblTuLap').style.fontWeight = '100';
         document.getElementById('boxVp').style.display = 'block';
         document.getElementById('boxPhienAm').style.display = 'none';
+        document.getElementById('boxTuLap').style.display = 'none';
     }
 
     document.getElementById('lblPhienAm').onclick = () => {
         document.getElementById('lblVp').style.fontWeight = '100';
         document.getElementById('lblPhienAm').style.fontWeight = '800';
+        document.getElementById('lblTuLap').style.fontWeight = '100';
         document.getElementById('boxVp').style.display = 'none';
         document.getElementById('boxPhienAm').style.display = 'block';
+        document.getElementById('boxTuLap').style.display = 'none';
+    }
+    
+    document.getElementById('lblTuLap').onclick = () => {
+        document.getElementById('lblVp').style.fontWeight = '100';
+        document.getElementById('lblPhienAm').style.fontWeight = '100';
+        document.getElementById('lblTuLap').style.fontWeight = '800';
+        document.getElementById('boxVp').style.display = 'none';
+        document.getElementById('boxPhienAm').style.display = 'none';
+        document.getElementById('boxTuLap').style.display = 'block';
+        let repeatedWords=countRepeatWords(document.getElementById('boxTrung').value);
+        document.getElementById('boxTuLap').innerText='';
+        for(let i=0; i<repeatedWords.length; i++) 
+        document.getElementById('boxTuLap').innerHTML+=repeatedWords[i].freq+'  '+repeatedWords[i].word+' = '+translateSimple(repeatedWords[i].word)+' = '+translatePhienAmSimple(repeatedWords[i].word)+'<br>';
+        
     }
 
     document.body.onclick = (event) => {
         //console.log(event.target);
+        //console.log(event.currentTarget);
         if (event.target.classList[0] != 'menuItem' && event.target.id != 'lblMenu') {
             document.getElementById(`mainMenu`).style.display = `none`;
             document.getElementById(`boxVp_contextMenu`).style.display = `none`;
@@ -1373,9 +1504,15 @@
     document.getElementById('frmUpdate_btnCancel').onclick = frmUpdate_btnCancelClick;
 
     firstRun(); //khoi tao indexedDb neu chua lam
-    loadDictNames();
-    loadDictVP();
-    loadExtraDicts();
+    if (window.location.search.toLowerCase() == '?cosan') {
+        loadOnSitePhienAm();
+        loadOnSiteVietphrase();
+        loadOnSiteNames();
+    } else {
+        loadDictNames();
+        loadDictVP();
+        loadExtraDicts();
+    }
     document.getElementById('frmOptions').style.display = 'none';
     document.getElementById('frmUpdate').style.display = 'none';
 </script>
