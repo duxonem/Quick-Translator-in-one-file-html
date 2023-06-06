@@ -36,6 +36,6 @@ Khung "Từ lặp" sẽ hiện những cụm từ lặp lại nhiều lần. Nó
 Với riêng Firefox, do các file từ điển lưu ở localStorage và indexedDB, nếu mở file trên nội bộ máy tính, khi chuyển qua nơi khác sẽ dẫn đến đổi đường dẫn. Điều này khiến trình duyệt hiểu giống như đổi tên miền khác dẫn đến các từ điển đã tải lên sẽ không có cho cho chương trình ở  đường dẫn mới. Vì vậy không nên chuyển vị trí nếu đã dùng quen.\
 Các trình duyệt với nhân Chromium không bị tình trạng như trên.
 
-Video hướng dẫn: https://streamable.com/2u86rh
+Video hướng dẫn: https://streamable.com/w78fxd
 
 Link thử https://qtwtest.000webhostapp.com/  
