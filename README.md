@@ -38,4 +38,4 @@ Các trình duyệt với nhân Chromium không bị tình trạng như trên.
 
 Video hướng dẫn: https://streamable.com/w78fxd
 
-Link thử https://qtwtest.000webhostapp.com/  
+Link thử https://qtwtest.000webhostapp.com/index.html  
