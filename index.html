@@ -231,6 +231,11 @@
             width: 25em;
             position: absolute;
         }
+
+        .highlight {
+            color:red;
+            background-color: yellow;
+        }
     </style>
 
     <script type="text/javascript">
@@ -248,7 +253,7 @@
         let Options = JSON.parse(localStorage.getItem('Options')) || { bracket: true, oneMeaning: false, limiter: ';', dichLieuTru: false };
         let selectedChineseText = '';
         let VpHighlight = '', PhienAmHighlight = '';
-
+        const marks = ['。', '，', '、','“', '”', '！', '？', '\n', '：', '.', ',', '!', '?'];
         let firstClick = true; //De danh choi
 
         let rawVP, rawNames, rawPhienAm;
@@ -815,10 +820,12 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         return result;
     }
 
-    function SaveFile(content = '', filename = '') {
-        const filetype = { type: "text/plain;charset=utf-8" }
+    function SaveFile(content = '', filename = '',withdate=false) {
+        const filetype = { type: "text/plain;charset=utf-8" };
+        dateStr= new Date().toJSON().slice(0,10).split`-`.join``;
         if (filename.trim() == '') filename = 'fileCMNName';
-        if (filename.split('.').length > 1 && filename.split('.').slice(-1) != 'txt') filename += '.txt';
+        if (filename.split('.').length <2 || filename.split('.').slice(-1) != 'txt') filename=(withdate)?filename+dateStr+'.txt':filename+'.txt';
+        else filename = withdate?filename.slice(0,-4)+ dateStr+'.txt':filename;
 
         let a = document.createElement('a');
         a.href = window.URL.createObjectURL(new Blob([content], filetype));
@@ -863,11 +870,11 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
                 sub=text.slice(i,i+j);
                 if (dictNames.HanViet[sub]!=undefined) {
                     result+=dictNames.HanViet[sub]+' ';
-                    i=i+j;
+                    i=i+j-1;
                     break; }
                 if (dictVP.HanViet[sub]!=undefined) {
                     result+=dictVP.HanViet[sub]+' ';
-                    i=i+j;
+                    i=i+j-1;
                     break; }
                 if (j==1)
                     if (dictPhienAm.HanViet[sub]!=undefined) result+=dictPhienAm.HanViet[sub]+' ';
@@ -1000,7 +1007,45 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         return result.sort((a, b) => (a.pos - b.pos));
     }
 
-    function translate3(txtChinese) { }
+    function translate3(text) {
+        //text=text.trim();
+        let result=new Array();
+        let tmpArr;
+        maxlength=dictVP.Han[0].length<text.length? dictVP.Han[0].length:text.length;
+
+        for (let i=0; i<text.length; i++) {
+            tmpArr={};
+            tmpArr.pos=i;
+            for(let j=maxlength; j>0; j--) {       
+                if (i+j >text.length) continue;
+                sub=text.slice(i,i+j);
+                if (dictNames.HanViet[sub]!=undefined) {
+                    tmpArr.orgText=sub;
+                    tmpArr.transText=dictNames.HanViet[sub];
+                    tmpArr.dict='Names';
+                    result.push(tmpArr);
+                    i=i+j-1;
+                    break; }
+                if (dictVP.HanViet[sub]!=undefined) {
+                    tmpArr.orgText=sub;
+                    tmpArr.transText=dictVP.HanViet[sub];
+                    tmpArr.dict='VP';
+                    result.push(tmpArr);
+                    i=i+j-1;
+                    break; }
+                if (j==1) {
+                    tmpArr.orgText=sub;
+                    if (dictPhienAm.HanViet[sub]!=undefined) {
+                        tmpArr.transText=dictPhienAm.HanViet[sub];
+                        tmpArr.dict='PhienAm'; }
+                    else {  tmpArr.transText=sub;
+                           tmpArr.dict='FA'; }
+                    result.push(tmpArr);       
+                }
+            }
+        }    
+        return result;    
+     }
 
     function translate4(txtChinese) { }
 
@@ -1074,6 +1119,32 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         if (VpHighlight != '') document.getElementById(VpHighlight).style.color = '';
         VpHighlight = t.id
         document.getElementById(VpHighlight).style.color = 'red';
+
+        let tt=event.target;
+        const leftLength=3;
+        const rightLength=5;
+        let thisText=tt.getAttribute('orgtext');
+        let leftText=''; 
+        while (leftText.length < leftLength && tt.getAttribute('orgtext') != '') {
+            if (tt.previousElementSibling == null) break;
+            if (marks.indexOf(tt.previousElementSibling.getAttribute('orgtext')) !==-1) break;
+            tt = tt.previousElementSibling;
+            leftText = tt.getAttribute('orgtext')+leftText;
+        }
+
+        tt=event.target;
+        let rightText='';
+        while (rightText.length < rightLength && tt.getAttribute('orgtext') != '') {
+            if (tt.nextElementSibling == null) break;
+            if (marks.indexOf(tt.nextElementSibling.getAttribute('orgtext')) !==-1) break;
+            tt = tt.nextElementSibling;
+            rightText += tt.getAttribute('orgtext');
+        }
+
+        let txtHTML=`<p>${leftText}<span class="highlight">${thisText}</span>${rightText}</p>`;
+        txtHTML+='<p>'+translatePhienAmSimple(leftText)+' <span class="highlight">'+translatePhienAmSimple(thisText)+'</span> '+translatePhienAmSimple(rightText)+'</p>';
+        txtHTML+='<div style="border-top: solid 1px gray;"></div'; 
+
         let result = '';
         const maxlength = dictVP.Han[0].length;
 
@@ -1083,7 +1154,6 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
             t = t.nextElementSibling;
         }
 
-        let txtHTML = '';
         for (let i = result.length; i > 0; i--) {
             if (dictVP.HanViet[result.substring(0, i)] != undefined)
                 txtHTML += '<p>' + result.substring(0, i) + ' = ' + dictVP.HanViet[result.substring(0, i)] + '</p>';
@@ -1371,7 +1441,6 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         
         myString=myString.trim();
         let tmpString = myString;
-        const marks = ['。', '，', '“', '”', '！', '？', '\n', '：', '.', ',', '!', '?'];
         for (let i = 0; i < marks.length; i++)
             tmpString = tmpString.replaceAll(marks[i], '\u0528');
 
@@ -1418,6 +1487,8 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
     document.getElementById('boxTrung').onchange = () => {
         let text1 = translate1(document.getElementById('boxTrung').value);
         let text2 = translate2(document.getElementById('boxTrung').value);
+        let text3 = translate3(document.getElementById('boxTrung').value);
+        
         let textPhienAm = translatePhienAm(document.getElementById('boxTrung').value);
         document.getElementById('boxVp').innerHTML = VpToHTML(text2);
         document.getElementById('boxPhienAm').innerHTML = PhienAmToHTML(textPhienAm);
@@ -1486,7 +1557,7 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         else document.getElementById("frmOptions_lblLimiter").style.display = "none";
     }
 
-    document.getElementById('menuExportVp').onclick = () => { SaveFile(dictToRaw(dictVP), 'Vietphrase'); }
+    document.getElementById('menuExportVp').onclick = () => { SaveFile(dictToRaw(dictVP), 'Vietphrase',true); }
     document.getElementById('menuExportNames').onclick = () => { SaveFile(dictToRaw(dictNames), 'Names'); }
 
     document.getElementById('frmOptions_btnCancel').onclick = frmOptions_btnCancelClick;
