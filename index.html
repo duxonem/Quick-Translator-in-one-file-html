@@ -323,7 +323,7 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
                             id='frmOptions_oneMeaning'>Vietphrase Một nghĩa<div id='frmOptions_lblLimiter'
                             title="Dấu cách giữa các nghĩa trong 1 muc Vietphrase">Dấu cách giữa các nghĩa<input
                                 id="frmOptions_limiter" type="text" minlength="1" maxlength="1"
-                                pattern="[!@#%^&*_=|;:/?~]" value=";"></div>
+                                pattern="[!@#%^&*_=|;:/?~]"></div>
                     </td>
                     <td title="Xoá các chữ đích, liễu, trứ trong bản convert Vietphrase cho dễ đọc"><input
                             type="checkbox" id="frmOptions_dichLieuTru">Xóa Đích Liễu Trứ</td>
@@ -510,7 +510,7 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
     function frmOptions_btnSaveClick() {
         Options.bracket = document.getElementById('frmOptions_bracket').checked;
         Options.oneMeaning = document.getElementById('frmOptions_oneMeaning').checked;
-        Options.limiter = document.getElementById('frmOptions_limiter').innerText;
+        Options.limiter = document.getElementById('frmOptions_limiter').value;
         Options.dichLieuTru = document.getElementById('frmOptions_dichLieuTru').checked;
         localStorage.setItem('Options', JSON.stringify(Options));
 
@@ -1077,7 +1077,7 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
                 result += '<span id="VP_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '">' + transArr[i].transText + '</span>';
             else {
                 if (transArr[i].dict == 'VP') {
-                    if (Options.oneMeaning) transArr[i].transText = transArr[i].transText.slice(Options.limiter)[0];
+                    if (Options.oneMeaning) transArr[i].transText = transArr[i].transText.split(Options.limiter)[0];
                     if (Options.bracket) transArr[i].transText = '[' + transArr[i].transText + ']';
                 }
                 result += '<span id="VP_' + (transArr[i].pos) + '" pos="' + (transArr[i].pos) + '" orgText="' + transArr[i].orgText + '"> ' + transArr[i].transText + '</span>';
