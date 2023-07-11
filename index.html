@@ -804,12 +804,14 @@ Truy cập vào đây để tải file gốc <a href='https://github.com/duxonem
         let resultDict = { Han: [], HanViet: {} };
         for (let i = 0; i < lines.length - 1; i++) {
             HanViet = lines[i].split('=');
-            if (HanViet.length < 2) break;  //dinh dang sai hoac chua doc len het, co the thu sua bang continue
+            if (HanViet.length < 2) continue;  //dinh dang sai hoac chua doc len het, co the thu sua bang continue
             HanViet[0] = HanViet[0].trim();
             HanViet[1] = HanViet[1].trim();
-            resultDict.Han.push(HanViet[0]);
+            if (HanViet[0]=='') continue;
+            //resultDict.Han.push(HanViet[0]);//dung o duoi cho le hon
             resultDict.HanViet[HanViet[0]] = HanViet[1];
         }
+        resultDict.Han=[...new Set(Object.keys(resultDict.HanViet))];
         resultDict.Han.sort((b, a) => a.length - b.length || a.localeCompare(b));
         return resultDict;
     }
