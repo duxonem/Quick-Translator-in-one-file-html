@@ -5,7 +5,7 @@ Chương trình này hoạt động giống Quick Translator nhưng chỉ có 1 
 
 ### Cài đặt và cách dùng
 
-Bạn có thể bỏ file index.html này lên 1 webserver để chạy trên mạng hoặc để trên máy tính dùng File explorer để mở trong trình duyệt. File rất nhỏ khoảng 65KB không cần cài thêm gì khác như .Net Framework đối với Quick Translator.
+Bạn có thể bỏ file index.html này lên 1 webserver để chạy trên mạng hoặc để trên máy tính dùng File explorer để mở trong trình duyệt. File rất nhỏ khoảng 70KB không cần cài thêm gì khác như .Net Framework đối với Quick Translator.
 
 Tuy nhiên chương trình vẫn cần các file từ điển để chạy. Các file từ điển cần thiết là Names.txt dùng cho tên nhân vật, Vietphrase.txt để convert các từ Trung sang Việt, PhienAm.txt để chuyển về âm Hán Việt.
 
