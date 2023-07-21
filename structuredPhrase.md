@@ -5,7 +5,7 @@ Quick Translator giới thiệu và đưa vào dùng Luật Nhân cho 1 số c�
 
 Dưới đây là cách hàm sTrans(text) thực hiện, ở đây không sử dụng Pronounce do không cần thiết:
 
-- Sử dụng nhiều cụm từ thay thế {0}, {1}... do đó có thể thay đổi vị trí của các cụm từ trên.
+- Sử dụng nhiều cụm từ thay thế {0}, {1}... do đó có thể thay đổi vị trí, thứ tự của các cụm từ trên. Các cụm từ này có thể là bất kỳ không nhất thiết phải là Name, Vietphrase... trừ khi đứng đầu tiên hoặc sau cùng (Vd: {0}adcd{1}dffgkf{3} ).
 - Đối với các cấu trúc mà {0} đứng đầu hoặc {n} sau cùng thì {0},{n} sẽ chỉ tìm trong Names, Vietphrase. Nếu không có thì trả lại câu cũ.
 - Code này có hạn chế không dùng {0}, {1}... cho các số 1,2,3....hoặc các chữ Latin; chỉ dùng với chữ Hán. Có thể đưa vào sau nếu thấy ổn định.
 - Các {0}.... không bao gồm dấu '.', ','... nói chung là các dấu chấm câu
