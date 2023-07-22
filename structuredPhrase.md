@@ -1,6 +1,7 @@
 Quick Translator giới thiệu và đưa vào dùng Luật Nhân cho 1 số cấu trúc câu đặc biệt trong tiếng Trung do đặc điểm ngôn ngữ mà việc dùng Vietphrase thay chữ không làm được. Tuy nhiên cách tiếp cận hiện tại có mấy hạn chế (suy đoán):
 
-- Chỉ dò vài thay thế 1 cụm từ {0}, chưa thực hiện được trên nhiều cụm từ
+- Chỉ dò và thay thế 1 cụm từ {0}, chưa thực hiện được trên nhiều cụm từ.
+- Có vẻ là dùng các từ trong Pronouns.txt (hoặc thêm Names, Vietphrase) thay thế cho {0} trong file Luatnhan.txt. Như vậy sẽ tạo ra dữ  liệu rất lớn khiến cho chạy chậm. Giả sử file Luatnhan có 100 dòng, Pronoún có 100 dòng, Names có 1.000 dòng, như vậy khi dùng cách này sẽ tạo ra 100*100=10.000 dòng dữ liệu mới với chỉ Pronouns. Tạo ra (100+1.000)*100 = 110.000 dòng dữ liệu mới với Pronouns và Names.
 - Có vẻ như dùng cách tách thành từng câu, thực hiện trên từng câu. Việc thực hiện như trên có thể sẽ chậm nếu convert trên cả bộ truyện. Một truyện hoàn chỉnh trung bình khoảng 5MB, mỗi chữ tiếng Trung chiếm 2bytes, như vậy 1 truyện có khoảng 2,5tr chữ. Trung bình 20 chữ 1 câu, ta có khoảng 125K câu. Giả sử file LuatNhan.txt có 100 quy tắc. như vậy chương trình sẽ chạy 125K*100=12M5 lần để convert các câu có cấu trúc trước khi thực hiện việc convert Vietphrase như khi không sử dụng.
 
 Dưới đây là cách hàm sTrans(text) thực hiện, ở đây không sử dụng Pronounce do không cần thiết:
